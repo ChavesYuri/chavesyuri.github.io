@@ -6,6 +6,7 @@
       attribute vec3 aVertexNormal;
       attribute vec2 aTextureCoord;
       
+      
       uniform mat4 uMMatrix;
       uniform mat4 uVMatrix;
       uniform mat4 uPMatrix;
@@ -79,7 +80,8 @@
       var yRot = 0;
       var yVelo = 0;
 	  
-
+	  var filtro = 0;
+	  var orbita = false;
 	  
 	  var xRotP = 0;
       var xVeloP = 0;
