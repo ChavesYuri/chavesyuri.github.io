@@ -80,6 +80,9 @@
       var yRot = 0;
       var yVelo = 0;
 	  
+	  var filtro = 0;
+	  var orbita = false;
+	  
 	  var xRotP = 0;
       var xVeloP = 0;
       var yRotP = 0;
@@ -102,51 +105,49 @@
       var azulInput;
     
       // Iniciar o ambiente quando a página for carregada
-      $(function()
-      {
-	iniciaWebGL();
+      $(function(){
+			iniciaWebGL();
       });
       
       // Iniciar o ambiente
-      function iniciaWebGL()
-      {
-	var canvas = $('#licao01-canvas')[0];
-	iniciarGL(canvas); // Definir como um canvas 3D
-	iniciarShaders();  // Obter e processar os Shaders
-	iniciarBuffers();  // Enviar o triângulo e quadrado na GPU
-	iniciarAmbiente(); // Definir background e cor do objeto
-	iniciarTextura();
-	
-	document.onkeydown = eventoTeclaPress;
-	document.onkeyup = eventoTeclaSolta;
-  
-	tick();
+    function iniciaWebGL(){
+		var canvas = $('#licao01-canvas')[0];
+		iniciarGL(canvas); // Definir como um canvas 3D
+		iniciarShaders();  // Obter e processar os Shaders
+		iniciarBuffers();  // Enviar o triângulo e quadrado na GPU
+		iniciarAmbiente(); // Definir background e cor do objeto
+		iniciarTextura();
+		
+		document.onkeydown = eventoTeclaPress;
+		document.onkeyup = eventoTeclaSolta;
+	  
+		tick();
       }
       
       
-      function tick()
-      {
-	requestAnimFrame(tick);
-	tratarTeclado();
-	desenharCena();
-	animar();
-      }
-      
-      function eventoTeclaPress(evento) {
-	teclasPressionadas[evento.keyCode] = true;
-  if(
+    function tick(){
+		requestAnimFrame(tick);
+		tratarTeclado();
+		desenharCena();
+		animar();
+    }
+	  
+	function eventoTeclaPress(evento) {
+		teclasPressionadas[evento.keyCode] = true;
+		if(
     (evento.keyCode >=60 && evento.keyCode <= 90) ||
     (evento.keyCode >=32 && evento.keyCode <= 40)
-  )
-	return false;
-      }
+        )		
+		return false;
+    }
 
-      function eventoTeclaSolta(evento) {
-	teclasPressionadas[evento.keyCode] = false;
-	return false;
-      }
+    function eventoTeclaSolta(evento) {
+		teclasPressionadas[evento.keyCode] = false;
+		return false;
+    }
       
-      function tratarTeclado() {
+    function tratarTeclado() {
+	
 	if (teclasPressionadas[33]) {
 	  // Page Up
 	  z -= 0.05;
@@ -174,87 +175,91 @@
 	
 	
 	if (teclasPressionadas[65]) {
-	  // Esquerda
+	  // A
 	  yVeloP -= 1;
 	}
 	if (teclasPressionadas[68]) {
-	  // Direita
+	  // D
 	  yVeloP += 1;
 	}
 	if (teclasPressionadas[87]) {
-	  // Cima
+	  // W
 	  xVeloP -= 1;
 	}
 	if (teclasPressionadas[83]) {
-	  // Baixo
+	  // S
 	  xVeloP += 1;
 	}
 	if (teclasPressionadas[70]) {
-	  // Anti-Horario
+	  // Anti-Horario F
 	  girar -= 0.01;
 	}
 	if (teclasPressionadas[71]) {
-	  // Horario
+	  // Horario G
 	  girar += 0.01;
-	}		
+	}
+
+	if (teclasPressionadas[72]) {
+	  // Horario G
+	  girar = 0;	
+	}
     }
       
-      function iniciarTextura()
-      {
+      
+	function iniciarTextura(){
+	
 	var imagemCaixa = new Image();
 	caixaTextura = gl.createTexture();
 	caixaTextura.image = imagemCaixa;
-	imagemCaixa.onload = function()
-	{
-	  tratarTextura(caixaTextura);
+	imagemCaixa.onload = function(){
+		tratarTextura(caixaTextura);
 	}
+	
 	imagemCaixa.src = "caixa.gif";
 	shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 	
 	var imagemPiramide = new Image();
 	piramideTextura = gl.createTexture();
 	piramideTextura.image = imagemPiramide;
-	imagemPiramide.onload = function()
-	{
-	  tratarTextura(piramideTextura);
+	imagemPiramide.onload = function(){
+		tratarTextura(piramideTextura);
 	}
-	imagemPiramide.src = "michael.gif";
+	
+	imagemPiramide.src = "mc.png";
 	shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 
-      }
-      function tratarTextura(textura)
-      {
+    }
+      
+	function tratarTextura(textura){
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	gl.bindTexture(gl.TEXTURE_2D, textura);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textura.image);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-
 	gl.bindTexture(gl.TEXTURE_2D, null);
-      }
+    }
       
-      function iniciarGL(canvas)
-      {
-	try
-	{
-	  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	  gl.viewportWidth = canvas.width;
-	  gl.viewportHeight = canvas.height;
+    function iniciarGL(canvas){
+	
+	try{
+	
+		gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+		gl.viewportWidth = canvas.width;
+		gl.viewportHeight = canvas.height;
 	}
-	catch(e)
-	{
-	  if(!gl)
-	  {
-	    alert("Não pode inicializar WebGL, desculpe");
-	  }
+	
+	catch(e){
+	if(!gl){
+		alert("Não pode inicializar WebGL, desculpe");
 	}
-      }
+		}
+			}
       
-      function iniciarShaders()
-      {
+    
+	function iniciarShaders(){
+	
 	var vertexShader = getShader(gl, "#shader-vs");
 	var fragmentShader = getShader(gl, "#shader-fs");
-	
 	shaderProgram = gl.createProgram();
 	gl.attachShader(shaderProgram, vertexShader);
 	gl.attachShader(shaderProgram, fragmentShader);
@@ -287,8 +292,7 @@
 	
     }
       
-      function getShader(gl, id)
-      {
+    function getShader(gl, id){
 	var shaderScript = $(id)[0];
 	if(!shaderScript) 
 	{
@@ -297,38 +301,35 @@
 	
 	var str = "";
 	var k = shaderScript.firstChild;
-	while(k)
-	{
+	while(k){
 	  if(k.nodeType == 3)
 	    str += k.textContent;
 	  k = k.nextSibling;
 	}
 	
 	var shader;
-	if(shaderScript.type == "x-shader/x-fragment")
-	{
-	  shader = gl.createShader(gl.FRAGMENT_SHADER);
+	if(shaderScript.type == "x-shader/x-fragment"){
+		shader = gl.createShader(gl.FRAGMENT_SHADER);
 	}
-	else if(shaderScript.type == "x-shader/x-vertex")
-	{
-	  shader = gl.createShader(gl.VERTEX_SHADER);
+	
+	else if(shaderScript.type == "x-shader/x-vertex"){
+		shader = gl.createShader(gl.VERTEX_SHADER);
 	}
-	else
-	{
-	  return null;
+	
+	else{
+		return null;
 	}
 	
 	gl.shaderSource(shader, str);
 	gl.compileShader(shader);
 	
-	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-	{
-	  alert(gl.getShaderInfoLog(shader));
-	  return null;
+	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+	alert(gl.getShaderInfoLog(shader));
+	return null;
 	}
 	
 	return shader;
-      }
+    }
       
       function iniciarBuffers()
       {
@@ -744,7 +745,9 @@
       	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, piramideVertexIndexBuffer);
       	setMatrixUniforms();
       	gl.drawElements(gl.TRIANGLES, piramideVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT,0);
-		mPopMatrix();
+		if (!orbita) {
+				mPopMatrix();
+			}
 	  }
       
       function setMatrixUniforms()
@@ -810,7 +813,7 @@
     <br />
     <input type="checkbox" id="luz" value="luz" checked /><label for="luz">Luz</label><br/>
     (Use as setas do teclado para girar o cubo e <code>Page Up</code>/<code>Page Down</code> para ampliar ou reduzir)
-	<p> (Use as teclas WASD para girar a pirâmide e as teclas F e G para fazer com que ela orbite o cubo)
+	<p> (Use as teclas WASD para girar a pirâmide, as teclas F e G para fazer com que ela orbite o cubo e a tecla H para que ela pare)
 
     <br/>
     <h2>Luz Difusa:</h2>
